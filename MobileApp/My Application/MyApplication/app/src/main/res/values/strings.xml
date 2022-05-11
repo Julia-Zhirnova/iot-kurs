@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">My Application</string>
+    <string name="camera">Camera</string>
+    <string name="text1">SMART Detect</string>
+    <string name="text2">CAMERA</string>
+    <string name="text3">Свободный персонал</string>
+    <string name="text4">Колличество поситителей</string>
+</resources>
