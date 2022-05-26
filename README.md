@@ -3,6 +3,7 @@
 ![image](https://user-images.githubusercontent.com/52165649/167928156-3f26c28c-0719-4a6a-8eb1-20fce2e12a32.png)
 # установка зависимостей
 pip install -r requirements.txt
+
 # save yolov4-tiny model
 python save_model.py --weights ./data/yolov4-tiny.weights --output ./checkpoints/yolov4-tiny-416 --model yolov4 --tiny
 
