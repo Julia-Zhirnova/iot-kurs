@@ -29,18 +29,34 @@ flags.DEFINE_string('weights', './checkpoints/yolov4-416',
 flags.DEFINE_integer('size', 416, 'resize images to')
 flags.DEFINE_boolean('tiny', False, 'yolo or yolo-tiny')
 flags.DEFINE_string('video', './data/video/test.mp4', 'path to input video or set to 0 for webcam')
-flags.DEFINE_string('output', None, 'path to output video')
-flags.DEFINE_string('output_format', 'XVID', 'codec used in VideoWriter when saving video to file')
+#flags.DEFINE_string('output', None, 'path to output video')
+#flags.DEFINE_string('output_format', 'XVID', 'codec used in VideoWriter when saving video to file')
 flags.DEFINE_boolean('dont_show', False, 'dont show video output')
 flags.DEFINE_boolean('info', False, 'show detailed info of tracked objects')
 flags.DEFINE_boolean('count', False, 'count objects being tracked on screen')
 import paho.mqtt.client as mqtt  # import the client1
 
 # Координаты прямой
-x1 = 40
-y1 = 150
-x2 = 600
-y2 = 150
+x1 = 520
+y1 = 0
+x2 = 520
+y2 = 600
+
+#mx = (x1 + x2)/2
+#my = (y1+y2)/2
+# угол между прямой и осью X
+#theta = math.atan(k)
+#print(theta, math.cos(theta), math.sin(theta))
+#r11 = x1 * math.cos(theta) - y1 * math.sin(theta)
+#r12 = x1 * math.sin(theta) + y1 * math.cos(theta)
+#r12 -= r12*2
+#r21 = x2 * math.cos(theta) - y2 * math.sin(theta)
+#r22 = x2 * math.sin(theta) + y2 * math.cos(theta)
+#r22 -= r22*2
+#print(x1,y1,x2,y2)
+#print(r11,r12,r21,r22)
+#print(x1 * math.cos(theta), y1 * math.sin(theta))
+#print(x1 *math.sin(theta), y1 * math.cos(theta))
 client = mqtt.Client('Pi')  # create new instance
 def connect_mqtt():
 
@@ -76,23 +92,24 @@ def calculate_trajectory(v):
     # угол между прямой и осью X
     theta = math.atan(k)
     r11 = v[0][0] * math.cos(theta) - v[0][1] * math.sin(theta)
-    r12 = -v[0][0] * math.sin(theta) + v[0][1] * math.cos(theta)
+    r12 = v[0][0] * math.sin(theta) + v[0][1] * math.cos(theta)
     r21 = v[1][0] * math.cos(theta) - v[1][1] * math.sin(theta)
-    r22 = -v[1][0] * math.sin(theta) + v[1][1] * math.cos(theta)
+    r22 = v[1][0] * math.sin(theta) + v[1][1] * math.cos(theta)
 
-    if (r11 - r21) == 0:
-        k = 0
-    else:
-        k = (r12 - r22) / (r11 - r21)
-    b = r22 - k * r21
+    #if (r11 - r21) == 0:
+    #    k = 0
+    #else:
+    #    k = (r12 - r22) / (r11 - r21)
+    #b = r22 - k * r21
 
     y3 = k * v[1][0] + b
-
-
+   # x3 = (v[0][1] - b)
+    #print(x3)
 
     #if v[0][1] < y3 < v[1][1]:
-    if r22 < y3 < r12:
-        print("объект вышел")
+    #if r22 < y3 < r12:
+    if v[1][0] < x2 < v[0][0]:
+        print("объект вошел")
         result = client.publish('channels/c8a9aadc-a0c7-45f8-9097-a95a06584f2f/messages', '[{"n":"vis","v":-1}]')  # publish
         msg = '[{"n":"vis","v":-1}]'
         topic = 'channels/c8a9aadc-a0c7-45f8-9097-a95a06584f2f/messages'
@@ -102,8 +119,9 @@ def calculate_trajectory(v):
         else:
             print("Failed to send message")
     #elif v[1][1] < y3 < v[0][1]:
-    elif r12 < y3 < r22:
-        print("объект вошел")
+    #elif r12 < y3 < r22:
+    elif v[0][0] < x2 < v[1][0]:
+        print("объект вышел")
         result = client.publish('channels/c8a9aadc-a0c7-45f8-9097-a95a06584f2f/messages', '[{"n":"vis","v":1}]')  # publish
         msg = '[{"n":"vis","v":1}]'
         topic = 'channels/c8a9aadc-a0c7-45f8-9097-a95a06584f2f/messages'
@@ -114,6 +132,7 @@ def calculate_trajectory(v):
             print("Failed to send message")
     else:
         print("прямая не пересечена")
+        print(v[0][0], v[1][0])
 
 def main(_argv):
     # Definition of the parameters
@@ -155,11 +174,11 @@ def main(_argv):
     out = None
 
     # get video ready to save locally if flag is set
-    if FLAGS.output:
+#    if FLAGS.output:
         # by default VideoCapture returns float instead of int
-        width = int(vid.get(cv2.CAP_PROP_FRAME_WIDTH))
-        height = int(vid.get(cv2.CAP_PROP_FRAME_HEIGHT))
-        fps = int(vid.get(cv2.CAP_PROP_FPS))
+#        width = int(vid.get(cv2.CAP_PROP_FRAME_WIDTH))
+#        height = int(vid.get(cv2.CAP_PROP_FRAME_HEIGHT))
+#        fps = int(vid.get(cv2.CAP_PROP_FPS))
        # codec = cv2.VideoWriter_fourcc(*FLAGS.output_format)
        # out = cv2.VideoWriter(FLAGS.output, codec, fps, (width, height))
 
@@ -182,8 +201,9 @@ def main(_argv):
         image_data = image_data[np.newaxis, ...].astype(np.float32)
         start_time = time.time()
 
+        #print(int(r11), int(r12), int(r21), int(r22))
         cv2.line(frame, (x1, y1), (x2, y2), (0, 0, 255), 4, cv2.LINE_8)
-
+        #cv2.line(frame, (int(r12), int(r11)), (int(r22), int(r21)), (255, 0, 255), 4, cv2.LINE_8)
         # run detections on tflite if flag is set
 
         batch_data = tf.constant(image_data)
