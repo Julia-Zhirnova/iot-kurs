@@ -11,3 +11,6 @@ python save_model.py --weights ./data/yolov4-tiny.weights --output ./checkpoints
 python object_tracker.py --weights ./checkpoints/yolov4-tiny-416 --video ./data/video/test.mp4 --output ./outputs/tiny.avi --tiny
 
 python object_tracker.py --weights ./checkpoints/yolov4-tiny-416 --video 0 --output ./outputs/tiny.avi --tiny
+
+# Run yolov4-tiny object tracker без сохранения видео
+python object_tracker.py --weights ./checkpoints/yolov4-tiny-416 --video ./data/video/test.mp4 --tiny
