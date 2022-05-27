@@ -111,7 +111,7 @@ def calculate_trajectory(v):
     if v[1][0] < x2 < v[0][0]:
         print("объект вошел")
         result = client.publish('channels/c8a9aadc-a0c7-45f8-9097-a95a06584f2f/messages', '[{"n":"vis","v":-1}]')  # publish
-        msg = '[{"n":"vis","v":-1}]'
+        msg = '[{"n":"vis","v":1}]'
         topic = 'channels/c8a9aadc-a0c7-45f8-9097-a95a06584f2f/messages'
         status = result[0]
         if status == 0:
@@ -123,7 +123,7 @@ def calculate_trajectory(v):
     elif v[0][0] < x2 < v[1][0]:
         print("объект вышел")
         result = client.publish('channels/c8a9aadc-a0c7-45f8-9097-a95a06584f2f/messages', '[{"n":"vis","v":1}]')  # publish
-        msg = '[{"n":"vis","v":1}]'
+        msg = '[{"n":"vis","v":-1}]'
         topic = 'channels/c8a9aadc-a0c7-45f8-9097-a95a06584f2f/messages'
         status = result[0]
         if status == 0:
